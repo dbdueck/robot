@@ -35,7 +35,9 @@ const (
 	SymbolWall   = " "
 	SymbolMiddle = "X"
 	SymbolRobot  = "*"
+	SymbolBlank  = " "
 
+	EnumColorAbbrev string = "YRGBW"
 	//1=bold, 4=underline, 5-blink, 7=inverse
 	//https://gist.github.com/raghav4/48716264a0f426cf95e4342c21ada8e7
 	ColorRed       = "\033[1;31m" // the "1;" = bold //31
@@ -54,16 +56,20 @@ const (
 	ColorReset     = "\033[0m"
 )
 
-const ( //An Enum
-	TypeEmpty = iota + 1 //because default=0
-	TypeHouse
-	TypeRobot
-	TypeWall //This can later get overriden by a robot
-	TypeMiddle
-)
+type SquareType int
 
 const ( //An Enum
-	Rotate0 = iota //default=0 is OK
+	EnumTypeEmpty SquareType = iota + 1 //because default=0
+	EnumTypeHouse
+	EnumTypeRobot
+	EnumTypeWall //This can later get overriden by a robot
+	EnumTypeMiddle
+)
+
+type Rotation int
+
+const ( //An Enum
+	Rotate0 Rotation = iota //default=0 is OK
 	RotateLeft
 	RotateTwo
 	RotateRight
@@ -78,9 +84,18 @@ const (
 	RobotIdxWhite
 )
 
+var ColorNames map[int]string = map[int]string{
+	RobotIdxYellow: "yellow",
+	RobotIdxRed:    "red",
+	RobotIdxGreen:  "green",
+	RobotIdxBlue:   "blue",
+	RobotIdxWhirl:  "purple",
+	RobotIdxWhite:  "white",
+}
+
 //https://twin.sh/articles/35/how-to-add-colors-to-your-console-terminal-output-in-go
 //
-var ColorNames map[string]string = map[string]string{
+var ColorCSSStyle map[string]string = map[string]string{
 	"yellow": ColorYellow,
 	"red":    ColorRed,
 	"green":  ColorGreen,
@@ -118,10 +133,10 @@ type Square struct {
 	X             int
 	Y             int
 	BoardSize     int
-	RobotColorIdx int    //enum  Yellow=0, Red=1, Green, Blue, Whirl
-	ColorName     string //or enum @deprecated
-	Symbol        string //or enum  sun, moon, star, planet,  wall
-	Typ           int    //enum
+	RobotColorIdx int        //enum  Yellow=0, Red=1, Green, Blue, Whirl
+	ColorName     string     //or enum @deprecated
+	Symbol        string     //or enum  sun, moon, star, planet,  wall
+	Typ           SquareType //int/enum
 	//Walls
 	Top    bool
 	Bottom bool
@@ -222,16 +237,16 @@ func (sq Square) GetPrintableSquare() (string, string, string, string) {
 func (sq Square) getSymbolAndColor() string {
 	var c11 string = SymbolWall
 	//Want to override a blank square
-	if sq.Typ == TypeHouse {
+	if sq.Typ == EnumTypeHouse {
 		//c11 = fmt.Sprintf("%s%s%s", ColorNames["bg"+sq.ColorName], sq.Symbol, ColorReset)
 		c11 = fmt.Sprintf("%s%s%s", RobotColorsInv[sq.RobotColorIdx], sq.Symbol, ColorReset)
-		log.Infof("calcSymbolColor, Type=House, Symbol=%s, SQ=%v", sq.Symbol, sq)
-	} else if sq.Typ == TypeRobot {
+		log.Tracef("calcSymbolColor, Type=House, Symbol=%s, SQ=%v", sq.Symbol, sq)
+	} else if sq.Typ == EnumTypeRobot {
 		c11 = fmt.Sprintf("%s%s%s", RobotColors[sq.RobotColorIdx], SymbolRobot, ColorReset)
-		log.Infof("calcSymbolColor, Type=Robot, Symbol=%s, SQ=%v", sq.Symbol, sq)
-	} else if sq.Typ == TypeMiddle {
+		log.Tracef("calcSymbolColor, Type=Robot, Symbol=%s, SQ=%v", sq.Symbol, sq)
+	} else if sq.Typ == EnumTypeMiddle {
 		c11 = SymbolMiddle
-	} else if sq.Typ == TypeWall {
+	} else if sq.Typ == EnumTypeWall {
 		c11 = SymbolWall //Empty box, I guess, unless they want something else Say a Robot gets placed here later
 	} else { // For null; or the possibly empty swirl (which isn't really defined.)
 		c11 = SymbolWall
@@ -257,7 +272,7 @@ func bool01(b bool) string {
 }
 
 //Rotate the borders +1, -1, or by 2 (+2 or -2)
-func (sq *Square) RotateBorder(rotation int) {
+func (sq *Square) RotateBorder(rotation Rotation) {
 
 	OLD := sq.ToStringBorder()
 	switch rotation {

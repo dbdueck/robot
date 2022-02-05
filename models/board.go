@@ -1,6 +1,7 @@
 package models
 
 import (
+	"errors"
 	"fmt"
 	"robot/lib"
 	"strings"
@@ -209,7 +210,7 @@ func (b *Board) CopySquare(aRobot *Square) {
 //PARAM colorIdx = enum for the color.  Y=0, R=1, G,B,W
 func (b *Board) setRobot(x int, y int, colorIdx int) {
 	sq := b.Squares[x][y]
-	sq.Typ = TypeRobot
+	sq.Typ = EnumTypeRobot
 	sq.Symbol = "!"
 	sq.RobotColorIdx = colorIdx
 	log.Infof("Setting Robot[%v,%v]=%v", x, y, colorIdx)
@@ -241,3 +242,59 @@ func (b *Board) LoadRobots(robotstring string) {
 // 	}
 // 	return s
 // }
+
+//Solve the board,
+//PARAM:  Solve for this robot:  "Red, Star"
+func (b *Board) Solve(parmSolve string) {
+	log.Infof("Board::Solve, %v", parmSolve)
+
+	strArry := strings.SplitN(parmSolve, ",", 2)
+	solveColor, solveShape := strArry[0], strArry[1]
+	log.Infof("Board::Solve, %v, %v, %v", parmSolve, solveColor, solveShape)
+	solveColorEnum := getRobotEnumFromColor(solveColor)
+	//solveShape is a 1 char value
+	//Remove this one eventually - it's not in the right place
+	log.Infof("Solving for:  Color, %v, c=%v, Shape=%v", solveColorEnum, solveColor, solveShape)
+
+	robotSq, err := b.FindSquareByTypeColorShape(EnumTypeHouse, solveColorEnum, solveShape)
+	if err != nil {
+		log.Fatalf("%v", err)
+
+	} else {
+
+		log.Infof("House we are looking for is at: %v,%v", robotSq.X, robotSq.Y)
+	}
+	//
+
+}
+
+//PARM: Color as a string. Only care about 1st char
+//RETURN RobotIdxYellow = iota,	RobotIdxRed,	RobotIdxGreen,	RobotIdxBlue,	RobotIdxWhirl,	RobotIdxWhite
+func getRobotEnumFromColor(c string) int {
+	c0 := strings.ToUpper(string(c[0]))
+	idx := strings.Index(EnumColorAbbrev, c0)
+	log.Tracef("getEnum:: Abbrev=%v, c0=%s, idx=%v", EnumColorAbbrev, c0, idx)
+	return idx
+}
+
+//Get the square with the Robot in it
+//PARAM: Typ:  Enum
+//PARAM: color: RobotColorIdx   (enum)
+//PARAM: shape - "Sun, Moon, Stars, Planet"
+func (b *Board) FindSquareByTypeColorShape(findTyp SquareType, findColor int, findShape string) (*Square, error) {
+	log.Infof("Searching for shape: Typ=%v, Color=%v (%v), Shape=%v",
+		findTyp, findColor, ColorNames[findColor], findShape)
+
+	for y := 0; y < b.Size; y++ {
+		for x := 0; x < b.Size; x++ {
+			sq := b.Squares[x][y]
+			if sq.Symbol != SymbolBlank {
+				log.Infof("SQ:=T=%v, C=%v, S=%v, [%v]", sq.Typ, sq.RobotColorIdx, sq.Symbol, sq)
+			}
+			if sq.Typ == findTyp && sq.RobotColorIdx == findColor && sq.Symbol == findShape {
+				return sq, nil
+			}
+		}
+	}
+	return nil, errors.New("shape not found, Color")
+}

@@ -17,6 +17,7 @@ var (
 	flagSkipMiddleIsland bool
 	parmBoardSections    string
 	parmRobotCoords      string
+	parmSolve            string
 	boardSectionsArry    = []string{"A1", "B1", "C1", "D1"}
 	boardRobots          []models.Square
 )
@@ -38,6 +39,7 @@ func init() {
 	playCmd.Flags().IntVarP(&boardSize, "size", "N", 16, "Size of board, eg 4 for a 4x4")
 	playCmd.Flags().StringVarP(&parmBoardSections, "sections", "s", "", "Sections (A1,B1,C1,D1")
 	playCmd.Flags().StringVarP(&parmRobotCoords, "robots", "r", "", "Robots, Hex (Y,B,G,R,W")
+	playCmd.Flags().StringVarP(&parmSolve, "solve", "", "", "Solve color,Shape")
 
 }
 
@@ -82,6 +84,11 @@ func controllerPlay() {
 		fmt.Print(board.DebugBoard())
 	}
 
+	if parmSolve != "" {
+		log.Info("SOLVER ", parmSolve)
+		board.Solve(parmSolve)
+	}
+
 }
 
 func parseParmBoardSections(sections string) []string {
@@ -92,4 +99,3 @@ func parseParmBoardSections(sections string) []string {
 	}
 	return s
 }
-

@@ -12,17 +12,13 @@ III |  IV
 */
 var (
 	//Transform from computer format (0,0 = top left) -> to
-	Xform0 = [3][3]int{{0, 1, 0}, {0, 0, 1}, {Rotate0, 0, 0}}   // Do Nothing
-	Xform1 = [3][3]int{{0, 0, 1}, {0, 1, 0}, {RotateTwo, 0, 0}} //Transpose To Quadrant I
-
+	Xform0 = [3][3]int{{0, 1, 0}, {0, 0, 1}, {int(Rotate0), 0, 0}}   // Do Nothing
+	Xform1 = [3][3]int{{0, 0, 1}, {0, 1, 0}, {int(RotateTwo), 0, 0}} //Transpose To Quadrant I
 	//                    x           y            borders
-	XformQ1 = [3][3]int{{8, 0, 1}, {7, -1, 0}, {RotateLeft, 0, 0}} //OK
-	//These still need to be calculated
-	XformQ2 = [3][3]int{{7, -1, 0}, {7, 0, -1}, {RotateTwo, 0, 0}}
-	XformQ3 = [3][3]int{{7, 0, -1}, {8, 1, 0}, {RotateRight, 0, 0}} //OK
-	XformQ4 = [3][3]int{{8, 1, 0}, {8, 0, 1}, {Rotate0, 0, 0}}      //OK
-	//Q2:= [...][...]int{{1,2,3},{4,5,6},}
-	//Borders: Rotate by 0, 1, 2,
+	XformQ1 = [3][3]int{{8, 0, 1}, {7, -1, 0}, {int(RotateLeft), 0, 0}} //OK
+	XformQ2 = [3][3]int{{7, -1, 0}, {7, 0, -1}, {int(RotateTwo), 0, 0}}
+	XformQ3 = [3][3]int{{7, 0, -1}, {8, 1, 0}, {int(RotateRight), 0, 0}} //OK
+	XformQ4 = [3][3]int{{8, 1, 0}, {8, 0, 1}, {int(Rotate0), 0, 0}}      //OK
 )
 
 type Quadrant struct {
@@ -41,7 +37,7 @@ type Quadrant struct {
 //TODO: Does this one run?  Only when this gets loaded
 func (quad *Quadrant) init() {
 	//This only needs to be set up once
-	quad.Middle = Square{X: 0, Y: 0, Symbol: SymbolMiddle, ColorName: "white", Typ: TypeMiddle, Left: true, Right: true, Top: true, Bottom: true}
+	quad.Middle = Square{X: 0, Y: 0, Symbol: SymbolMiddle, ColorName: "white", Typ: EnumTypeMiddle, Left: true, Right: true, Top: true, Bottom: true}
 	//This needs to get set each time you create a new one
 	quad.Items = []*Square{
 		&quad.RobotRed, &quad.RobotGreen,
@@ -61,12 +57,12 @@ func (quad *Quadrant) InitAllRobots() {
 
 func (quad *Quadrant) LoadA1() {
 	log.Trace("LoadA1#")
-	quad.RobotYellow = Square{X: 0, Y: 2, Symbol: SymbolPlanet, RobotColorIdx: RobotIdxYellow, ColorName: "yellow", Typ: TypeHouse, Right: true, Bottom: true}
-	quad.RobotBlue = Square{X: 5, Y: 3, Symbol: SymbolStar, RobotColorIdx: RobotIdxBlue, ColorName: "blue", Typ: TypeHouse, Left: true, Top: true}
-	quad.RobotGreen = Square{X: 1, Y: 5, Symbol: SymbolMoon, RobotColorIdx: RobotIdxGreen, ColorName: "green", Typ: TypeHouse, Left: true, Bottom: true}
-	quad.RobotRed = Square{X: 6, Y: 6, Symbol: SymbolSun, RobotColorIdx: RobotIdxRed, ColorName: "red", Typ: TypeHouse, Top: true, Right: true}
-	quad.FenceHorz = Square{X: 7, Y: 2, Top: true, Typ: TypeWall, Symbol: SymbolWall}
-	quad.FenceVert = Square{X: 4, Y: 7, Left: true, Typ: TypeWall, Symbol: SymbolWall}
+	quad.RobotYellow = Square{X: 0, Y: 2, Symbol: SymbolPlanet, RobotColorIdx: RobotIdxYellow, ColorName: "yellow", Typ: EnumTypeHouse, Right: true, Bottom: true}
+	quad.RobotBlue = Square{X: 5, Y: 3, Symbol: SymbolStar, RobotColorIdx: RobotIdxBlue, ColorName: "blue", Typ: EnumTypeHouse, Left: true, Top: true}
+	quad.RobotGreen = Square{X: 1, Y: 5, Symbol: SymbolMoon, RobotColorIdx: RobotIdxGreen, ColorName: "green", Typ: EnumTypeHouse, Left: true, Bottom: true}
+	quad.RobotRed = Square{X: 6, Y: 6, Symbol: SymbolSun, RobotColorIdx: RobotIdxRed, ColorName: "red", Typ: EnumTypeHouse, Top: true, Right: true}
+	quad.FenceHorz = Square{X: 7, Y: 2, Top: true, Typ: EnumTypeWall, Symbol: SymbolWall}
+	quad.FenceVert = Square{X: 4, Y: 7, Left: true, Typ: EnumTypeWall, Symbol: SymbolWall}
 	// log.Debugf("LoadA1: Red=%v", quad.RobotRed)
 	// log.Debugf("LoadA1: Green=%v", quad.RobotGreen)
 	quad.InitAllRobots() //This even inits an empty swirl
@@ -75,26 +71,26 @@ func (quad *Quadrant) LoadA1() {
 
 func (quad *Quadrant) LoadA2() {
 	log.Trace("LoadA2#")
-	quad.RobotYellow = Square{X: 6, Y: 1, Symbol: SymbolPlanet, RobotColorIdx: RobotIdxYellow, ColorName: "yellow", Typ: TypeHouse, Right: true, Bottom: true}
-	quad.RobotBlue = Square{X: 2, Y: 5, Symbol: SymbolStar, RobotColorIdx: RobotIdxBlue, ColorName: "blue", Typ: TypeHouse, Left: true, Top: true}
-	quad.RobotGreen = Square{X: 5, Y: 3, Symbol: SymbolMoon, RobotColorIdx: RobotIdxGreen, ColorName: "green", Typ: TypeHouse, Left: true, Bottom: true}
-	quad.RobotRed = Square{X: 0, Y: 2, Symbol: SymbolSun, RobotColorIdx: RobotIdxRed, ColorName: "red", Typ: TypeHouse, Top: true, Right: true}
-	quad.FenceHorz = Square{X: 7, Y: 3, Top: true, Typ: TypeWall, Symbol: SymbolWall}
-	quad.FenceVert = Square{X: 4, Y: 7, Left: true, Typ: TypeWall, Symbol: SymbolWall}
+	quad.RobotYellow = Square{X: 6, Y: 1, Symbol: SymbolPlanet, RobotColorIdx: RobotIdxYellow, ColorName: "yellow", Typ: EnumTypeHouse, Right: true, Bottom: true}
+	quad.RobotBlue = Square{X: 2, Y: 5, Symbol: SymbolStar, RobotColorIdx: RobotIdxBlue, ColorName: "blue", Typ: EnumTypeHouse, Left: true, Top: true}
+	quad.RobotGreen = Square{X: 5, Y: 3, Symbol: SymbolMoon, RobotColorIdx: RobotIdxGreen, ColorName: "green", Typ: EnumTypeHouse, Left: true, Bottom: true}
+	quad.RobotRed = Square{X: 0, Y: 2, Symbol: SymbolSun, RobotColorIdx: RobotIdxRed, ColorName: "red", Typ: EnumTypeHouse, Top: true, Right: true}
+	quad.FenceHorz = Square{X: 7, Y: 3, Top: true, Typ: EnumTypeWall, Symbol: SymbolWall}
+	quad.FenceVert = Square{X: 4, Y: 7, Left: true, Typ: EnumTypeWall, Symbol: SymbolWall}
 	quad.InitAllRobots() //This even inits an empty swirl
 	log.Tracef("All Robots, %v", quad.Items)
 }
 
 func (quad *Quadrant) LoadB1() {
 	log.Trace("LoadB1#")
-	quad.RobotYellow = Square{X: 1, Y: 3, Symbol: SymbolSun, RobotColorIdx: RobotIdxYellow, ColorName: "yellow", Typ: TypeHouse, Right: true, Bottom: true}
-	quad.RobotBlue = Square{X: 2, Y: 1, Symbol: SymbolMoon, RobotColorIdx: RobotIdxBlue, ColorName: "blue", Typ: TypeHouse, Left: true, Bottom: true}
-	quad.RobotGreen = Square{X: 6, Y: 4, Symbol: SymbolPlanet, RobotColorIdx: RobotIdxGreen, ColorName: "green", Typ: TypeHouse, Left: true, Bottom: true}
-	quad.RobotRed = Square{X: 5, Y: 6, Symbol: SymbolStar, RobotColorIdx: RobotIdxRed, ColorName: "red", Typ: TypeHouse, Top: true, Right: true}
-	quad.RobotSwirl = Square{X: 4, Y: 0, Symbol: SymbolWhirl, RobotColorIdx: RobotIdxWhirl, ColorName: "purple", Typ: TypeHouse, Top: true, Left: true}
+	quad.RobotYellow = Square{X: 1, Y: 3, Symbol: SymbolSun, RobotColorIdx: RobotIdxYellow, ColorName: "yellow", Typ: EnumTypeHouse, Right: true, Bottom: true}
+	quad.RobotBlue = Square{X: 2, Y: 1, Symbol: SymbolMoon, RobotColorIdx: RobotIdxBlue, ColorName: "blue", Typ: EnumTypeHouse, Left: true, Bottom: true}
+	quad.RobotGreen = Square{X: 6, Y: 4, Symbol: SymbolPlanet, RobotColorIdx: RobotIdxGreen, ColorName: "green", Typ: EnumTypeHouse, Left: true, Bottom: true}
+	quad.RobotRed = Square{X: 5, Y: 6, Symbol: SymbolStar, RobotColorIdx: RobotIdxRed, ColorName: "red", Typ: EnumTypeHouse, Top: true, Right: true}
+	quad.RobotSwirl = Square{X: 4, Y: 0, Symbol: SymbolWhirl, RobotColorIdx: RobotIdxWhirl, ColorName: "purple", Typ: EnumTypeHouse, Top: true, Left: true}
 
-	quad.FenceHorz = Square{X: 7, Y: 3, Top: true, Typ: TypeWall, Symbol: SymbolWall}
-	quad.FenceVert = Square{X: 2, Y: 7, Left: true, Typ: TypeWall, Symbol: SymbolWall}
+	quad.FenceHorz = Square{X: 7, Y: 3, Top: true, Typ: EnumTypeWall, Symbol: SymbolWall}
+	quad.FenceVert = Square{X: 2, Y: 7, Left: true, Typ: EnumTypeWall, Symbol: SymbolWall}
 	// log.Debugf("LoadA1: Red=%v", quad.RobotRed)
 	// log.Debugf("LoadA1: Green=%v", quad.RobotGreen)
 	quad.InitAllRobots() //This even inits an empty swirl
@@ -103,26 +99,26 @@ func (quad *Quadrant) LoadB1() {
 
 func (quad *Quadrant) LoadB2() {
 	log.Trace("LoadB2#")
-	quad.RobotYellow = Square{X: 6, Y: 4, Symbol: SymbolSun, RobotColorIdx: RobotIdxYellow, ColorName: "yellow", Typ: TypeHouse, Right: true, Bottom: true}
-	quad.RobotBlue = Square{X: 1, Y: 6, Symbol: SymbolMoon, RobotColorIdx: RobotIdxBlue, ColorName: "blue", Typ: TypeHouse, Left: true, Top: true}
-	quad.RobotGreen = Square{X: 2, Y: 3, Symbol: SymbolPlanet, RobotColorIdx: RobotIdxGreen, ColorName: "green", Typ: TypeHouse, Left: true, Bottom: true}
-	quad.RobotRed = Square{X: 5, Y: 2, Symbol: SymbolStar, RobotColorIdx: RobotIdxRed, ColorName: "red", Typ: TypeHouse, Top: true, Right: true}
-	quad.RobotSwirl = Square{X: 0, Y: 2, Symbol: SymbolWhirl, RobotColorIdx: RobotIdxWhirl, ColorName: "purple", Typ: TypeHouse, Top: true, Left: true}
+	quad.RobotYellow = Square{X: 6, Y: 4, Symbol: SymbolSun, RobotColorIdx: RobotIdxYellow, ColorName: "yellow", Typ: EnumTypeHouse, Right: true, Bottom: true}
+	quad.RobotBlue = Square{X: 1, Y: 6, Symbol: SymbolMoon, RobotColorIdx: RobotIdxBlue, ColorName: "blue", Typ: EnumTypeHouse, Left: true, Top: true}
+	quad.RobotGreen = Square{X: 2, Y: 3, Symbol: SymbolPlanet, RobotColorIdx: RobotIdxGreen, ColorName: "green", Typ: EnumTypeHouse, Left: true, Bottom: true}
+	quad.RobotRed = Square{X: 5, Y: 2, Symbol: SymbolStar, RobotColorIdx: RobotIdxRed, ColorName: "red", Typ: EnumTypeHouse, Top: true, Right: true}
+	quad.RobotSwirl = Square{X: 0, Y: 2, Symbol: SymbolWhirl, RobotColorIdx: RobotIdxWhirl, ColorName: "purple", Typ: EnumTypeHouse, Top: true, Left: true}
 
-	quad.FenceHorz = Square{X: 7, Y: 1, Top: true, Typ: TypeWall, Symbol: SymbolWall}
-	quad.FenceVert = Square{X: 4, Y: 7, Left: true, Typ: TypeWall, Symbol: SymbolWall}
+	quad.FenceHorz = Square{X: 7, Y: 1, Top: true, Typ: EnumTypeWall, Symbol: SymbolWall}
+	quad.FenceVert = Square{X: 4, Y: 7, Left: true, Typ: EnumTypeWall, Symbol: SymbolWall}
 	quad.InitAllRobots() //This even inits an empty swirl
 	log.Tracef("All Robots, %v", quad.Items)
 }
 
 func (quad *Quadrant) LoadC1() {
 	log.Trace("LoadC1#")
-	quad.RobotYellow = Square{X: 1, Y: 4, Symbol: SymbolStar, RobotColorIdx: RobotIdxYellow, ColorName: "yellow", Typ: TypeHouse, Left: true, Top: true}
-	quad.RobotBlue = Square{X: 4, Y: 1, Symbol: SymbolPlanet, RobotColorIdx: RobotIdxBlue, ColorName: "blue", Typ: TypeHouse, Right: true, Top: true}
-	quad.RobotGreen = Square{X: 6, Y: 5, Symbol: SymbolSun, RobotColorIdx: RobotIdxGreen, ColorName: "green", Typ: TypeHouse, Left: true, Bottom: true}
-	quad.RobotRed = Square{X: 3, Y: 6, Symbol: SymbolMoon, RobotColorIdx: RobotIdxRed, ColorName: "red", Typ: TypeHouse, Bottom: true, Right: true}
-	quad.FenceHorz = Square{X: 7, Y: 2, Top: true, Typ: TypeWall, Symbol: SymbolWall}
-	quad.FenceVert = Square{X: 6, Y: 7, Left: true, Typ: TypeWall, Symbol: SymbolWall}
+	quad.RobotYellow = Square{X: 1, Y: 4, Symbol: SymbolStar, RobotColorIdx: RobotIdxYellow, ColorName: "yellow", Typ: EnumTypeHouse, Left: true, Top: true}
+	quad.RobotBlue = Square{X: 4, Y: 1, Symbol: SymbolPlanet, RobotColorIdx: RobotIdxBlue, ColorName: "blue", Typ: EnumTypeHouse, Right: true, Top: true}
+	quad.RobotGreen = Square{X: 6, Y: 5, Symbol: SymbolSun, RobotColorIdx: RobotIdxGreen, ColorName: "green", Typ: EnumTypeHouse, Left: true, Bottom: true}
+	quad.RobotRed = Square{X: 3, Y: 6, Symbol: SymbolMoon, RobotColorIdx: RobotIdxRed, ColorName: "red", Typ: EnumTypeHouse, Bottom: true, Right: true}
+	quad.FenceHorz = Square{X: 7, Y: 2, Top: true, Typ: EnumTypeWall, Symbol: SymbolWall}
+	quad.FenceVert = Square{X: 6, Y: 7, Left: true, Typ: EnumTypeWall, Symbol: SymbolWall}
 	// log.Debugf("LoadA1: Red=%v", quad.RobotRed)
 	// log.Debugf("LoadA1: Green=%v", quad.RobotGreen)
 	quad.InitAllRobots() //This even inits an empty swirl
@@ -131,12 +127,12 @@ func (quad *Quadrant) LoadC1() {
 
 func (quad *Quadrant) LoadC2() {
 	log.Trace("LoadC2#")
-	quad.RobotYellow = Square{X: 1, Y: 6, Symbol: SymbolStar, RobotColorIdx: RobotIdxYellow, ColorName: "yellow", Typ: TypeHouse, Left: true, Top: true}
-	quad.RobotBlue = Square{X: 1, Y: 2, Symbol: SymbolPlanet, RobotColorIdx: RobotIdxBlue, ColorName: "blue", Typ: TypeHouse, Left: true, Bottom: true}
-	quad.RobotGreen = Square{X: 6, Y: 5, Symbol: SymbolSun, RobotColorIdx: RobotIdxGreen, ColorName: "green", Typ: TypeHouse, Right: true, Bottom: true}
-	quad.RobotRed = Square{X: 4, Y: 1, Symbol: SymbolMoon, RobotColorIdx: RobotIdxRed, ColorName: "red", Typ: TypeHouse, Top: true, Right: true}
-	quad.FenceHorz = Square{X: 7, Y: 2, Top: true, Typ: TypeWall, Symbol: SymbolWall}
-	quad.FenceVert = Square{X: 3, Y: 7, Left: true, Typ: TypeWall, Symbol: SymbolWall}
+	quad.RobotYellow = Square{X: 1, Y: 6, Symbol: SymbolStar, RobotColorIdx: RobotIdxYellow, ColorName: "yellow", Typ: EnumTypeHouse, Left: true, Top: true}
+	quad.RobotBlue = Square{X: 1, Y: 2, Symbol: SymbolPlanet, RobotColorIdx: RobotIdxBlue, ColorName: "blue", Typ: EnumTypeHouse, Left: true, Bottom: true}
+	quad.RobotGreen = Square{X: 6, Y: 5, Symbol: SymbolSun, RobotColorIdx: RobotIdxGreen, ColorName: "green", Typ: EnumTypeHouse, Right: true, Bottom: true}
+	quad.RobotRed = Square{X: 4, Y: 1, Symbol: SymbolMoon, RobotColorIdx: RobotIdxRed, ColorName: "red", Typ: EnumTypeHouse, Top: true, Right: true}
+	quad.FenceHorz = Square{X: 7, Y: 2, Top: true, Typ: EnumTypeWall, Symbol: SymbolWall}
+	quad.FenceVert = Square{X: 3, Y: 7, Left: true, Typ: EnumTypeWall, Symbol: SymbolWall}
 	quad.InitAllRobots() //This even inits an empty swirl
 	log.Tracef("All Robots, %v", quad.Items)
 }
@@ -144,12 +140,12 @@ func (quad *Quadrant) LoadC2() {
 //-------------------------------------------------------------------------------------
 func (quad *Quadrant) LoadD1() {
 	log.Trace("LoadD1#")
-	quad.RobotYellow = Square{X: 1, Y: 3, Symbol: SymbolMoon, RobotColorIdx: RobotIdxYellow, ColorName: "yellow", Typ: TypeHouse, Right: true, Bottom: true}
-	quad.RobotBlue = Square{X: 5, Y: 1, Symbol: SymbolSun, RobotColorIdx: RobotIdxBlue, ColorName: "blue", Typ: TypeHouse, Left: true, Bottom: true}
-	quad.RobotGreen = Square{X: 2, Y: 6, Symbol: SymbolStar, RobotColorIdx: RobotIdxGreen, ColorName: "green", Typ: TypeHouse, Left: true, Top: true}
-	quad.RobotRed = Square{X: 6, Y: 5, Symbol: SymbolPlanet, RobotColorIdx: RobotIdxRed, ColorName: "red", Typ: TypeHouse, Top: true, Right: true}
-	quad.FenceHorz = Square{X: 7, Y: 4, Top: true, Typ: TypeWall, Symbol: SymbolWall}
-	quad.FenceVert = Square{X: 4, Y: 7, Left: true, Typ: TypeWall, Symbol: SymbolWall}
+	quad.RobotYellow = Square{X: 1, Y: 3, Symbol: SymbolMoon, RobotColorIdx: RobotIdxYellow, ColorName: "yellow", Typ: EnumTypeHouse, Right: true, Bottom: true}
+	quad.RobotBlue = Square{X: 5, Y: 1, Symbol: SymbolSun, RobotColorIdx: RobotIdxBlue, ColorName: "blue", Typ: EnumTypeHouse, Left: true, Bottom: true}
+	quad.RobotGreen = Square{X: 2, Y: 6, Symbol: SymbolStar, RobotColorIdx: RobotIdxGreen, ColorName: "green", Typ: EnumTypeHouse, Left: true, Top: true}
+	quad.RobotRed = Square{X: 6, Y: 5, Symbol: SymbolPlanet, RobotColorIdx: RobotIdxRed, ColorName: "red", Typ: EnumTypeHouse, Top: true, Right: true}
+	quad.FenceHorz = Square{X: 7, Y: 4, Top: true, Typ: EnumTypeWall, Symbol: SymbolWall}
+	quad.FenceVert = Square{X: 4, Y: 7, Left: true, Typ: EnumTypeWall, Symbol: SymbolWall}
 	// log.Debugf("LoadA1: Red=%v", quad.RobotRed)
 	// log.Debugf("LoadA1: Green=%v", quad.RobotGreen)
 	quad.InitAllRobots() //This even inits an empty swirl
@@ -158,36 +154,36 @@ func (quad *Quadrant) LoadD1() {
 
 func (quad *Quadrant) LoadD2() {
 	log.Trace("LoadD2#")
-	quad.RobotYellow = Square{X: 5, Y: 6, Symbol: SymbolMoon, RobotColorIdx: RobotIdxYellow, ColorName: "yellow", Typ: TypeHouse, Right: true, Bottom: true}
-	quad.RobotBlue = Square{X: 1, Y: 4, Symbol: SymbolSun, RobotColorIdx: RobotIdxBlue, ColorName: "blue", Typ: TypeHouse, Right: true, Top: true}
-	quad.RobotGreen = Square{X: 6, Y: 1, Symbol: SymbolStar, RobotColorIdx: RobotIdxGreen, ColorName: "green", Typ: TypeHouse, Left: true, Top: true}
-	quad.RobotRed = Square{X: 3, Y: 2, Symbol: SymbolPlanet, RobotColorIdx: RobotIdxRed, ColorName: "red", Typ: TypeHouse, Bottom: true, Left: true}
-	quad.FenceHorz = Square{X: 7, Y: 3, Top: true, Typ: TypeWall, Symbol: SymbolWall}
-	quad.FenceVert = Square{X: 3, Y: 7, Left: true, Typ: TypeWall, Symbol: SymbolWall}
+	quad.RobotYellow = Square{X: 5, Y: 6, Symbol: SymbolMoon, RobotColorIdx: RobotIdxYellow, ColorName: "yellow", Typ: EnumTypeHouse, Right: true, Bottom: true}
+	quad.RobotBlue = Square{X: 1, Y: 4, Symbol: SymbolSun, RobotColorIdx: RobotIdxBlue, ColorName: "blue", Typ: EnumTypeHouse, Right: true, Top: true}
+	quad.RobotGreen = Square{X: 6, Y: 1, Symbol: SymbolStar, RobotColorIdx: RobotIdxGreen, ColorName: "green", Typ: EnumTypeHouse, Left: true, Top: true}
+	quad.RobotRed = Square{X: 3, Y: 2, Symbol: SymbolPlanet, RobotColorIdx: RobotIdxRed, ColorName: "red", Typ: EnumTypeHouse, Bottom: true, Left: true}
+	quad.FenceHorz = Square{X: 7, Y: 3, Top: true, Typ: EnumTypeWall, Symbol: SymbolWall}
+	quad.FenceVert = Square{X: 3, Y: 7, Left: true, Typ: EnumTypeWall, Symbol: SymbolWall}
 	quad.InitAllRobots() //This even inits an empty swirl
 	log.Tracef("All Robots, %v", quad.Items)
 }
 
 func (quad *Quadrant) LoadZ0() {
 	log.Trace("LoadZ0#")
-	quad.RobotYellow = Square{X: 0, Y: 0, Symbol: SymbolMoon, RobotColorIdx: RobotIdxYellow, ColorName: "yellow", Typ: TypeHouse, Right: true, Bottom: true}
-	quad.RobotBlue = Square{X: 0, Y: 0, Symbol: SymbolSun, RobotColorIdx: RobotIdxBlue, ColorName: "blue", Typ: TypeHouse, Right: true, Top: true}
-	quad.RobotGreen = Square{X: 0, Y: 0, Symbol: SymbolStar, RobotColorIdx: RobotIdxGreen, ColorName: "green", Typ: TypeHouse, Left: true, Top: true}
-	quad.RobotRed = Square{X: 0, Y: 0, Symbol: SymbolPlanet, RobotColorIdx: RobotIdxRed, ColorName: "red", Typ: TypeHouse, Bottom: true, Left: true}
-	quad.FenceHorz = Square{X: 3, Y: 3, Top: true, Typ: TypeWall, Symbol: SymbolWall}
-	quad.FenceVert = Square{X: 3, Y: 7, Left: true, Typ: TypeWall, Symbol: SymbolWall}
+	quad.RobotYellow = Square{X: 0, Y: 0, Symbol: SymbolMoon, RobotColorIdx: RobotIdxYellow, ColorName: "yellow", Typ: EnumTypeHouse, Right: true, Bottom: true}
+	quad.RobotBlue = Square{X: 0, Y: 0, Symbol: SymbolSun, RobotColorIdx: RobotIdxBlue, ColorName: "blue", Typ: EnumTypeHouse, Right: true, Top: true}
+	quad.RobotGreen = Square{X: 0, Y: 0, Symbol: SymbolStar, RobotColorIdx: RobotIdxGreen, ColorName: "green", Typ: EnumTypeHouse, Left: true, Top: true}
+	quad.RobotRed = Square{X: 0, Y: 0, Symbol: SymbolPlanet, RobotColorIdx: RobotIdxRed, ColorName: "red", Typ: EnumTypeHouse, Bottom: true, Left: true}
+	quad.FenceHorz = Square{X: 3, Y: 3, Top: true, Typ: EnumTypeWall, Symbol: SymbolWall}
+	quad.FenceVert = Square{X: 3, Y: 7, Left: true, Typ: EnumTypeWall, Symbol: SymbolWall}
 	quad.InitAllRobots() //This even inits an empty swirl
 	log.Tracef("All Robots, %v", quad.Items)
 }
 
 func (quad *Quadrant) LoadZ1() {
 	log.Trace("LoadZ1#")
-	quad.RobotYellow = Square{X: 2, Y: 6, Symbol: SymbolMoon, RobotColorIdx: RobotIdxYellow, ColorName: "yellow", Typ: TypeHouse, Right: true, Bottom: true}
-	quad.RobotBlue = Square{X: 0, Y: 7, Symbol: SymbolSun, RobotColorIdx: RobotIdxBlue, ColorName: "blue", Typ: TypeHouse, Right: true, Top: true}
-	quad.RobotGreen = Square{X: 0, Y: 0, Symbol: SymbolStar, RobotColorIdx: RobotIdxGreen, ColorName: "green", Typ: TypeHouse, Left: true, Top: true}
-	quad.RobotRed = Square{X: 0, Y: 0, Symbol: SymbolPlanet, RobotColorIdx: RobotIdxRed, ColorName: "red", Typ: TypeHouse, Bottom: true, Left: true}
-	quad.FenceHorz = Square{X: 7, Y: 3, Top: true, Typ: TypeWall, Symbol: SymbolWall}
-	quad.FenceVert = Square{X: 3, Y: 7, Left: true, Typ: TypeWall, Symbol: SymbolWall}
+	quad.RobotYellow = Square{X: 2, Y: 6, Symbol: SymbolMoon, RobotColorIdx: RobotIdxYellow, ColorName: "yellow", Typ: EnumTypeHouse, Right: true, Bottom: true}
+	quad.RobotBlue = Square{X: 0, Y: 7, Symbol: SymbolSun, RobotColorIdx: RobotIdxBlue, ColorName: "blue", Typ: EnumTypeHouse, Right: true, Top: true}
+	quad.RobotGreen = Square{X: 0, Y: 0, Symbol: SymbolStar, RobotColorIdx: RobotIdxGreen, ColorName: "green", Typ: EnumTypeHouse, Left: true, Top: true}
+	quad.RobotRed = Square{X: 0, Y: 0, Symbol: SymbolPlanet, RobotColorIdx: RobotIdxRed, ColorName: "red", Typ: EnumTypeHouse, Bottom: true, Left: true}
+	quad.FenceHorz = Square{X: 7, Y: 3, Top: true, Typ: EnumTypeWall, Symbol: SymbolWall}
+	quad.FenceVert = Square{X: 3, Y: 7, Left: true, Typ: EnumTypeWall, Symbol: SymbolWall}
 	quad.InitAllRobots() //This even inits an empty swirl
 	log.Tracef("All Robots, %v", quad.Items)
 }
@@ -321,7 +317,7 @@ func (quad *Quadrant) XformQuadrantByVector(transposeVector [3][3]int) {
 			x0, xpos, x0, xdx, y0, xdy, (xpos), x0*xdx, y0*xdy, item.X)
 		log.Tracef("MathY[%v]: %v + (%v * %v) + (%v * %v ) = %v + %v + %v = %v",
 			y0, ypos, x0, ydx, y0, ydy, (xpos), x0*ydx, y0*ydy, item.Y)
-		item.RotateBorder(vecRotate)
+		item.RotateBorder(Rotation(vecRotate))
 		// sq.Top = sq.Top || item.Top
 		// sq.Bottom = sq.Bottom || item.Bottom
 		// sq.Left = sq.Left || item.Left

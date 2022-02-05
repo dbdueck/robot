@@ -2,6 +2,7 @@ package lib
 
 import (
 	log "github.com/sirupsen/logrus"
+	//	log "github.com/sirupsen/logrus"
 )
 
 //Convert single  String character to int  -
